@@ -1,0 +1,23 @@
+CREATE TABLE items (
+  item_id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  name VARCHAR(250) NOT NULL,
+  color VARCHAR(250) NOT NULL,
+  price BIGINT NOT NULL,
+  category VARCHAR(250),
+  src VARCHAR(500) NOT NULL,
+  is_liked BOOLEAN,
+  purchase_year INT,
+  purchase_country VARCHAR(250),
+  description VARCHAR(1000) NOT NULL,
+  short_description VARCHAR(500) NOT NULL,
+  renter_name VARCHAR(500) NOT NULL,
+  renter_lastname VARCHAR(500) NOT NULL,
+  renter_email VARCHAR(500),
+  availability BOOLEAN,
+  size VARCHAR(50) NOT NULL,
+  user_id INTEGER NOT NULL,
+  role_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (user_id),
+  FOREIGN KEY (role_id) REFERENCES roles (role_id)
+);
