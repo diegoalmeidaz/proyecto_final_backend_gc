@@ -7,6 +7,7 @@ const {
   logout,
   updateUser,
   deleteUser,
+  getUserInfo,
 } = require('../controllers/auth')
 const {
   validationMiddleware,
@@ -22,5 +23,6 @@ router.post('/login', loginValidation, validationMiddleware, login)
 router.get('/logout', logout)
 router.put('/users/:user_id', updateUser);
 router.delete('/auth/delete/:user_id', userAuth, adminAuth, deleteUser);
+router.get('/me', userAuth, getUserInfo);
 
 module.exports = router

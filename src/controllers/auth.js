@@ -145,4 +145,23 @@ exports.deleteUser = async (req, res) => {
 
 
 
+exports.getUserInfo = async (req, res) => {
+  try {
+    const userId = req.user.id; // Modifique esta línea
+    console.log('User ID:', userId);
+    const { rows } = await db.query('SELECT * FROM users WHERE user_id = $1', [userId]);
+    console.log('Query result:', rows);
+
+    if (!rows.length) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const user = rows[0];
+    delete user.password;
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
 
