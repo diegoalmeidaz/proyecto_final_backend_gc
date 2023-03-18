@@ -16,8 +16,13 @@ CREATE TABLE items (
   renter_email VARCHAR(500),
   availability BOOLEAN,
   size VARCHAR(50) NOT NULL,
+  laundry_charge BIGINT,
+  renters_commision DECIMAL(10, 5),
+  safe_deposit BIGINT,
+  independent_designer_dress BOOLEAN,
   user_id INTEGER NOT NULL,
   role_id INTEGER NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users (user_id),
-  FOREIGN KEY (role_id) REFERENCES roles (role_id)
+  FOREIGN KEY (role_id) REFERENCES roles (role_id),
+  purchase_price_paid_by_renter VARCHAR(500)
 );
