@@ -5,16 +5,16 @@ const pool = require("../db/pool");
 const itemController = require("../controllers/itemController");
 
 router.get('/', async (req, res) => {
-    try {
-      const items = await itemController.getItems();
-      const maxPrice = Math.round(Math.max(...items.map((product) => product.price)));
-  
-      setTimeout(() => {
-        res.json({ products: itemController.applyFilters(items, req.query), maxPrice });
-      }, 250);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
+  try {
+    const items = await itemController.getItems(req.query);
+    const maxPrice = Math.round(Math.max(...items.map((product) => product.price)));
+
+    setTimeout(() => {
+      res.json({ products: items, maxPrice });
+    }, 250);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // POST - agregar un nuevo producto

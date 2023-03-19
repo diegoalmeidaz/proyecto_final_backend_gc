@@ -11,6 +11,7 @@ const db = require("./db/pool");
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/items");
 const ordersRouter = require("./routes/orders"); // Importa el enrutador de órdenes
+const roleRouter = require('./routes/role');
 
 // Configura los middleware
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use(passport.initialize());
 app.use("/users", authRoutes);
 app.use("/items", productRoutes); // Agrega las rutas de productos
 app.use("/orders", ordersRouter); // Agrega las rutas de órdenes
+app.use('/roles', roleRouter);
 
 // Inicia el servidor
 const appStart = () => {

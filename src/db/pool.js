@@ -13,4 +13,12 @@ const pool = new Pool({
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
+  oneOrNone: async (text, params) => {
+    const res = await pool.query(text, params);
+    return res.rowCount === 1 ? res.rows[0] : null;
+  },
+  any: async (text, params) => {
+    const res = await pool.query(text, params);
+    return res.rows;
+  },
 };

@@ -17,19 +17,19 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { email, password, username, name, lastname, rol } = req.body;
+  const { email, password, username, name, lastname, role } = req.body;
 
   try {
     const hashedPassword = await hash(password, 10);
 
-    const role = rol || 'user';
+    const role_name = role || 'user';
 
-    const roleResult = await db.query('INSERT INTO roles (role_name) VALUES ($1) ON CONFLICT (role_name) DO NOTHING RETURNING role_id', [role]);
-    const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [role])).rows[0].role_id;
+    const roleResult = await db.query('INSERT INTO roles (role_name) VALUES ($1) ON CONFLICT (role_name) DO NOTHING RETURNING role_id', [role_name]);
+    const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [role_name])).rows[0].role_id;
 
     const userResult = await db.query(
-      'INSERT INTO users(email, password, username, name, lastname, rol) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id',
-      [email, hashedPassword, username, name, lastname, role]
+      'INSERT INTO users(email, password, username, name, lastname) VALUES ($1, $2, $3, $4, $5) RETURNING user_id', // Eliminamos la columna 'role'
+      [email, hashedPassword, username, name, lastname]
     );
 
     const userId = userResult.rows[0].user_id;
@@ -101,13 +101,13 @@ exports.logout = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   const user_id = parseInt(req.params.user_id, 10);
-  const { name, rol } = req.body;
+  const { name, role } = req.body;
 
   try {
-    const roleResult = await db.query('INSERT INTO roles (role_name) VALUES ($1) ON CONFLICT (role_name) DO NOTHING RETURNING role_id', [rol]);
-    const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [rol])).rows[0].role_id;
+    const roleResult = await db.query('INSERT INTO roles (role_name) VALUES ($1) ON CONFLICT (role_name) DO NOTHING RETURNING role_id', [role]);
+    const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [role])).rows[0].role_id;
 
-    const { rows } = await db.query('UPDATE users SET name = $1, rol = $2 WHERE user_id = $3 RETURNING *', [name, rol, user_id]);
+    const { rows } = await db.query('UPDATE users SET name = $1 WHERE user_id = $2 RETURNING *', [name, user_id]); // Eliminamos la columna 'rol'
     res.json(rows[0]);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -147,21 +147,41 @@ exports.deleteUser = async (req, res) => {
 
 exports.getUserInfo = async (req, res) => {
   try {
-    const userId = req.user.id; // Modifique esta línea
-    console.log('User ID:', userId);
-    const { rows } = await db.query('SELECT * FROM users WHERE user_id = $1', [userId]);
-    console.log('Query result:', rows);
+    const { id } = req.user;
+    const { rows } = await db.query(`
+      SELECT users.user_id, users.username, users.email, users.name, users.lastname, roles.role_name
+      FROM users
+      INNER JOIN user_roles ON users.user_id = user_roles.user_id
+      INNER JOIN roles ON user_roles.role_id = roles.role_id
+      WHERE users.user_id = $1
+    `, [id]);
 
-    if (!rows.length) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
     }
 
-    const user = rows[0];
-    delete user.password;
-    res.status(200).json({ success: true, user });
+    const userInfo = rows[0];
+    return res.status(200).json({
+      success: true,
+      user: {
+        user_id: userInfo.user_id,
+        username: userInfo.username,
+        email: userInfo.email,
+        role: userInfo.role_name,
+        name: userInfo.name,
+        lastname: userInfo.lastname,
+        
+      },
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.log(error.message);
+    return res.status(500).json({
+      error: error.message,
+    });
   }
 };
+
 

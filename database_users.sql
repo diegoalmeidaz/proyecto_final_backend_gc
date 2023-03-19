@@ -7,7 +7,7 @@ CREATE TABLE users (
   username VARCHAR(250) UNIQUE NOT NULL,
   name VARCHAR(250) NOT NULL,
   lastname VARCHAR(250) NOT NULL,
-  rol VARCHAR(250),
+  
   phone VARCHAR(250),
   address VARCHAR(250)
 );

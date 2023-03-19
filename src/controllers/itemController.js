@@ -24,13 +24,12 @@ exports.create = async (req, res) => {
     safe_deposit,
     independent_designer_dress,
     user_id,
-    role_id,
     purchase_price_paid_by_renter,
   } = req.body;
 
   try {
     const { rows } = await db.query(
-      "INSERT INTO items (name, color, price, category, src, is_liked, purchase_year, purchase_country, description, short_description, renter_name, renter_lastname, renter_email, availability, size, laundry_charge, renters_commision, safe_deposit, independent_designer_dress, user_id, role_id, purchase_price_paid_by_renter) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22) RETURNING *",
+      "INSERT INTO items (name, color, price, category, src, is_liked, purchase_year, purchase_country, description, short_description, renter_name, renter_lastname, renter_email, availability, size, laundry_charge, renters_commision, safe_deposit, independent_designer_dress, user_id, purchase_price_paid_by_renter) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *",
       [
         name,
         color,
@@ -52,15 +51,16 @@ exports.create = async (req, res) => {
         safe_deposit,
         independent_designer_dress,
         user_id,
-        role_id,
         purchase_price_paid_by_renter,
       ]
     );
+
     res.json(rows[0]);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // update (PUT)
 exports.update = async (req, res) => {
@@ -86,13 +86,12 @@ exports.update = async (req, res) => {
     safe_deposit,
     independent_designer_dress,
     user_id,
-    role_id,
     purchase_price_paid_by_renter,
   } = req.body;
 
   try {
     const { rows } = await db.query(
-      "UPDATE items SET name = $1, color = $2, price = $3, category = $4, src = $5, is_liked = $6, purchase_year = $7, purchase_country = $8, description = $9, short_description = $10, renter_name = $11, renter_lastname = $12, renter_email = $13, availability = $14, size = $15, laundry_charge = $16, renters_commision = $17, safe_deposit = $18, independent_designer_dress = $19, user_id = $20, role_id = $21, purchase_price_paid_by_renter = $22 WHERE item_id = $23 RETURNING *",
+      "UPDATE items SET name = $1, color = $2, price = $3, category = $4, src = $5, is_liked = $6, purchase_year = $7, purchase_country = $8, description = $9, short_description = $10, renter_name = $11, renter_lastname = $12, renter_email = $13, availability = $14, size = $15, laundry_charge = $16, renters_commision = $17, safe_deposit = $18, independent_designer_dress = $19, user_id = $20, purchase_price_paid_by_renter = $21 WHERE item_id = $22 RETURNING *",
       [
         name,
         color,
@@ -114,16 +113,17 @@ exports.update = async (req, res) => {
         safe_deposit,
         independent_designer_dress,
         user_id,
-        role_id,
         purchase_price_paid_by_renter,
         item_id,
       ]
     );
+
     res.json(rows[0]);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // delete (DELETE)
 exports.delete = async (req, res) => {
@@ -154,15 +154,24 @@ exports.delete = async (req, res) => {
   }
 };
 
-// getItems (GET)
-exports.getItems = async () => {
+
+exports.getItems = async (filters) => {
   try {
     const { rows } = await db.query("SELECT * FROM items");
-    return rows;
+    const itemsWithRoles = [];
+
+    for (const item of rows) {
+      const role_id = await getRoleByUserId(item.user_id);
+      itemsWithRoles.push({ ...item, role_id });
+    }
+
+    return applyFilters(itemsWithRoles, filters);
   } catch (error) {
     throw new Error(error.message);
   }
 };
+
+
 
 function containsSizes(sizes, product) {
   // Caso base, no omitir productos cuando no hay filtros de tamaño
@@ -231,12 +240,25 @@ function containsIndependentDesignerDresses(independentFilter, product) {
 }
 
 
+async function getRoleByUserId(user_id) {
+  try {
+    const { rows } = await db.query(
+      "SELECT role_id FROM user_roles WHERE user_id = $1",
+      [user_id]
+    );
+    if (rows.length > 0) {
+      return rows[0].role_id;
+    }
+    return null;
+  } catch (error) {
+    console.error(error.message);
+    return null;
+  }
+}
 
-
-
-function applyFilters(
+async function applyFilters(
   products,
-  { query, sort, colors, sizes, minPrice, maxPrice, brands, independentFilter } // Agrega independentFilter aquí
+  { query, sort, colors, sizes, minPrice, maxPrice, brands, independentFilter }
 ) {
   const filteredProducts = [];
 
@@ -270,6 +292,12 @@ function applyFilters(
       continue;
     }
 
+    // Obtenemos el role_id del usuario utilizando la función getRoleByUserId
+    const role_id = await getRoleByUserId(product.user_id);
+
+    // Aplica la lógica basada en el rol aquí utilizando el valor de role_id
+    // ...
+
     filteredProducts.push(product);
   }
 
@@ -287,6 +315,7 @@ function applyFilters(
     }
   });
 }
+
 
 
 module.exports = {

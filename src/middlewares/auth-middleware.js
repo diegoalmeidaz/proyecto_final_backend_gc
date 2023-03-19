@@ -8,7 +8,7 @@ exports.adminAuth = async (req, res, next) => {
       const user = req.user;
       console.log('User in adminAuth:', user); // Agrega esta línea
   
-      if (user.rol !== 'admin') {
+      if (user.role !== 'admin') {
         return res.status(403).json({ message: 'Forbidden' });
       }
   

@@ -21,18 +21,25 @@ passport.use(
     try {
       console.log('Decoded JWT:', { id });
       const { rows } = await db.query(
-        'SELECT user_id, username, rol FROM users WHERE user_id = $1',
+        `
+        SELECT users.user_id, users.username, roles.role_name 
+        FROM users 
+        INNER JOIN user_roles ON users.user_id = user_roles.user_id 
+        INNER JOIN roles ON user_roles.role_id = roles.role_id 
+        WHERE users.user_id = $1
+        `,
         [id]
       );
 
-      console.log('Query result:', rows); // Agregue esta línea
+      console.log('Query result:', rows);
 
       if (!rows.length) {
         throw new Error('401 not authorized');
       }
 
-      let user = { id: rows[0].user_id, username: rows[0].username, rol: rows[0].rol };
-      console.log('User object:', user); // Agregue esta línea
+      let user = { id: rows[0].user_id, username: rows[0].username, role: rows[0].role_name };
+
+      console.log('User object:', user);
 
       return await done(null, user);
     } catch (error) {
@@ -41,5 +48,3 @@ passport.use(
     }
   })
 );
-
-
