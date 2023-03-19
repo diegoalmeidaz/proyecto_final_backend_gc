@@ -17,6 +17,10 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET - obtener un ítem específico por ID
+router.get("/:item_id", itemController.getById);
+
+
 // POST - agregar un nuevo producto
 router.post("/", itemController.create);
 

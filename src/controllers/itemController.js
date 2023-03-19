@@ -171,6 +171,30 @@ exports.getItems = async (filters) => {
   }
 };
 
+// get by id (GET)
+exports.getById = async (req, res) => {
+  const { item_id } = req.params;
+
+  try {
+    const { rows } = await db.query("SELECT * FROM items WHERE item_id = $1", [
+      item_id,
+    ]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
 
 
 function containsSizes(sizes, product) {
@@ -323,6 +347,7 @@ module.exports = {
   getItems: exports.getItems,
   update: exports.update,
   delete: exports.delete,
+  getById: exports.getById,
   applyFilters,
   containsColors,
   containsSizes,
