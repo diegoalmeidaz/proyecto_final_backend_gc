@@ -1,12 +1,19 @@
 const db = require('../db/pool');
 
-const getAllUserRoles = async (req, res) => {
+const getUserRolesByUserId = async (req, res) => {
   try {
-    const userRoles = await db.query('SELECT * FROM user_roles');
-    res.status(200).json(userRoles.rows);
+    const { user_id } = req.params;
+    const query = `
+      SELECT roles.role_id, roles.role_name
+      FROM user_roles
+      INNER JOIN roles ON user_roles.role_id = roles.role_id
+      WHERE user_roles.user_id = $1
+    `;
+    const { rows } = await db.query(query, [user_id]);
+    res.status(200).json(rows);
   } catch (error) {
-    console.error('Error al obtener los user_roles:', error);
-    res.status(500).json({ message: 'Error al obtener los user_roles' });
+    console.error('Error al obtener los roles del usuario:', error);
+    res.status(500).json({ message: 'Error al obtener los roles del usuario' });
   }
 };
 
@@ -40,28 +47,23 @@ const deleteUserRole = async (req, res) => {
 
 const updateUserRole = async (req, res) => {
     try {
-      const { user_id, role_id } = req.params;
-      const { new_role_id } = req.body;
+      const { user_id } = req.params;
+      const { role_id } = req.body;
+      const queryDelete = 'DELETE FROM user_roles WHERE user_id = $1';
+      await db.query(queryDelete, [user_id]);
   
-      const updatedUserRole = await db.oneOrNone(
-        'UPDATE user_roles SET role_id = $1 WHERE user_id = $2 AND role_id = $3 RETURNING *',
-        [new_role_id, user_id, role_id]
-      );
-  
-      if (updatedUserRole) {
-        res.status(200).json(updatedUserRole);
-      } else {
-        res.status(404).json({ message: 'User_role no encontrado' });
-      }
+      const queryInsert = 'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)';
+      await db.query(queryInsert, [user_id, role_id]);
+      res.status(200).json({ message: 'Rol de usuario actualizado' });
     } catch (error) {
-      console.error('Error al actualizar el user_role:', error);
-      res.status(500).json({ message: 'Error al actualizar el user_role' });
+      console.error('Error al actualizar el rol del usuario:', error);
+      res.status(500).json({ message: 'Error al actualizar el rol del usuario' });
     }
   };
 
 
 module.exports = {
-  getAllUserRoles,
+getUserRolesByUserId,
   createUserRole,
   deleteUserRole,
   updateUserRole
