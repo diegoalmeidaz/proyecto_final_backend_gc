@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
   try {
     const hashedPassword = await hash(password, 10);
 
-    const role_name = role || 'user';
+    const role_name = role || 'renter';
 
     const roleResult = await db.query('INSERT INTO roles (role_name) VALUES ($1) ON CONFLICT (role_name) DO NOTHING RETURNING role_id', [role_name]);
     const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [role_name])).rows[0].role_id;

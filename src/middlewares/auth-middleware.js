@@ -4,18 +4,31 @@ const db = require('../db/pool');
 exports.userAuth = passport.authenticate('jwt', { session: false });
 
 exports.adminAuth = async (req, res, next) => {
-    try {
-      const user = req.user;
-      console.log('User in adminAuth:', user); // Agrega esta línea
-  
-      if (user.role !== 'admin') {
-        return res.status(403).json({ message: 'Forbidden' });
-      }
-  
-      next();
-    } catch (error) {
-      console.log('Error in adminAuth:', error); // Agrega esta línea
-      return res.status(500).json({ error: error.message });
+  try {
+    const user = req.user;
+    console.log('User in adminAuth:', user);
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden' });
     }
-  };
-  
+
+    next();
+  } catch (error) {
+    console.log('Error in adminAuth:', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.adminOrRenterAuth = async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    if (user.role === "admin" || user.role === "renter" || user.role === "user") {
+      next();
+    } else {
+      res.status(403).json({ error: "Acceso denegado: se requiere ser admin o renter." });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error en la autenticación de admin o renter." });
+  }
+};
