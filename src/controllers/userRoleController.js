@@ -47,19 +47,21 @@ const deleteUserRole = async (req, res) => {
 
 const updateUserRole = async (req, res) => {
     try {
-      const { user_id } = req.params;
-      const { role_id } = req.body;
-      const queryDelete = 'DELETE FROM user_roles WHERE user_id = $1';
-      await db.query(queryDelete, [user_id]);
-  
-      const queryInsert = 'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)';
-      await db.query(queryInsert, [user_id, role_id]);
-      res.status(200).json({ message: 'Rol de usuario actualizado' });
+        const { user_id } = req.params;
+        const { roles } = req.body;
+        const queryDelete = 'DELETE FROM user_roles WHERE user_id = $1';
+        await db.query(queryDelete, [user_id]);
+
+        const queryInsert = 'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)';
+        for (const role_id of roles) {
+            await db.query(queryInsert, [user_id, role_id]);
+        }
+        res.status(200).json({ message: 'Roles de usuario actualizados' });
     } catch (error) {
-      console.error('Error al actualizar el rol del usuario:', error);
-      res.status(500).json({ message: 'Error al actualizar el rol del usuario' });
+        console.error('Error al actualizar los roles del usuario:', error);
+        res.status(500).json({ message: 'Error al actualizar los roles del usuario' });
     }
-  };
+};
 
 
 module.exports = {
