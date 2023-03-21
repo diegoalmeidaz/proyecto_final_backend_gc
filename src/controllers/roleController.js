@@ -3,7 +3,7 @@ const db = require('../db/pool');
 const getAllRoles = async (req, res) => {
   try {
     const roles = await db.query('SELECT * FROM roles');
-    res.status(200).json(roles);
+    res.status(200).json(roles.rows);
   } catch (error) {
     console.error('Error al obtener los roles:', error);
     res.status(500).json({ message: 'Error al obtener los roles' });

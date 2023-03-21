@@ -7,6 +7,7 @@ exports.create = async (req, res) => {
     name,
     color,
     price,
+    brand,
     category,
     src,
     is_liked,
@@ -29,11 +30,12 @@ exports.create = async (req, res) => {
 
   try {
     const { rows } = await db.query(
-      "INSERT INTO items (name, color, price, category, src, is_liked, purchase_year, purchase_country, description, short_description, renter_name, renter_lastname, renter_email, availability, size, laundry_charge, renters_commision, safe_deposit, independent_designer_dress, user_id, purchase_price_paid_by_renter) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *",
+      "INSERT INTO items (name, color, price, brand, category, src, is_liked, purchase_year, purchase_country, description, short_description, renter_name, renter_lastname, renter_email, availability, size, laundry_charge, renters_commision, safe_deposit, independent_designer_dress, user_id, purchase_price_paid_by_renter) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22) RETURNING *",
       [
         name,
         color,
         price,
+        brand,
         category,
         src,
         is_liked,
@@ -55,11 +57,13 @@ exports.create = async (req, res) => {
       ]
     );
 
-    res.json(rows[0]);
+     res.json(rows[0]);
   } catch (error) {
+    console.error("Error en la creación del artículo:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 // update (PUT)
@@ -67,6 +71,7 @@ exports.update = async (req, res) => {
   const item_id = parseInt(req.params.item_id, 10);
   const {
     name,
+    brand, // Agrega la variable brand aquí
     color,
     price,
     category,
@@ -88,12 +93,15 @@ exports.update = async (req, res) => {
     user_id,
     purchase_price_paid_by_renter,
   } = req.body;
+  console.log("Datos recibidos del front-end:", req.body); // console log para ver que es lo que estamos recibiendo del front.
 
   try {
     const { rows } = await db.query(
-      "UPDATE items SET name = $1, color = $2, price = $3, category = $4, src = $5, is_liked = $6, purchase_year = $7, purchase_country = $8, description = $9, short_description = $10, renter_name = $11, renter_lastname = $12, renter_email = $13, availability = $14, size = $15, laundry_charge = $16, renters_commision = $17, safe_deposit = $18, independent_designer_dress = $19, user_id = $20, purchase_price_paid_by_renter = $21 WHERE item_id = $22 RETURNING *",
+      // Agrega brand a la consulta SQL
+      "UPDATE items SET name = $1, brand = $2, color = $3, price = $4, category = $5, src = $6, is_liked = $7, purchase_year = $8, purchase_country = $9, description = $10, short_description = $11, renter_name = $12, renter_lastname = $13, renter_email = $14, availability = $15, size = $16, laundry_charge = $17, renters_commision = $18, safe_deposit = $19, independent_designer_dress = $20, user_id = $21, purchase_price_paid_by_renter = $22 WHERE item_id = $23 RETURNING *",
       [
         name,
+        brand, // Agrega brand a los parámetros de la consulta
         color,
         price,
         category,
@@ -120,6 +128,7 @@ exports.update = async (req, res) => {
 
     res.json(rows[0]);
   } catch (error) {
+    console.error("Error en la actualizacion del artículo:", error);
     res.status(500).json({ error: error.message });
   }
 };

@@ -7,11 +7,12 @@ require("./middlewares/passport-middleware");
 const cors = require("cors");
 const db = require("./db/pool");
 
-// Importa las rutas
+
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/items");
-const ordersRouter = require("./routes/orders"); // Importa el enrutador de órdenes
+const ordersRouter = require("./routes/orders");
 const roleRouter = require('./routes/role');
+const userRoleRouter = require('./routes/userRole'); 
 
 // Configura los middleware
 app.use(express.json());
@@ -21,9 +22,10 @@ app.use(passport.initialize());
 
 // Inicializa las rutas
 app.use("/users", authRoutes);
-app.use("/items", productRoutes); // Agrega las rutas de productos
-app.use("/orders", ordersRouter); // Agrega las rutas de órdenes
+app.use("/items", productRoutes); 
+app.use("/orders", ordersRouter); 
 app.use('/roles', roleRouter);
+app.use('/user_roles', userRoleRouter);
 
 // Inicia el servidor
 const appStart = () => {
