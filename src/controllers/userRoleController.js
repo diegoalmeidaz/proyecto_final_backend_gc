@@ -1,17 +1,27 @@
 const db = require("../db/pool");
 const { hash } = require("bcryptjs");
+const { decrypt, encrypt } = require("../encryption/encryption");
+const CryptoJS = require("crypto-js");
+const secretKey = 'aXveryXcomplexXandXlongXsecretXkey123';
 
 const getUserRolesByUserId = async (req, res) => {
   try {
     const { user_id } = req.params;
     const query = `
-      SELECT roles.role_id, roles.role_name
-      FROM user_roles
-      INNER JOIN roles ON user_roles.role_id = roles.role_id
-      WHERE user_roles.user_id = $1
-    `;
+        SELECT roles.role_id, roles.role_name
+        FROM user_roles
+        INNER JOIN roles ON user_roles.role_id = roles.role_id
+        WHERE user_roles.user_id = $1
+      `;
     const { rows } = await db.query(query, [user_id]);
-    res.status(200).json(rows);
+
+    // Encriptar los datos antes de enviarlos al cliente
+    console.log("Datos antes de encriptar:", JSON.stringify(rows));
+    const encryptedData = encrypt(JSON.stringify(rows));
+
+    console.log("Datos después de encriptar:", encryptedData);
+
+    res.status(200).json({ encryptedData });
   } catch (error) {
     console.error("Error al obtener los roles del usuario:", error);
     res.status(500).json({ message: "Error al obtener los roles del usuario" });
@@ -74,12 +84,13 @@ const updateUserRole = async (req, res) => {
 
 const updateUserInfoAndRole = async (req, res) => {
     const user_id = parseInt(req.params.user_id, 10);
-    const { name, lastname, email, username, password, roles, phone, address } = req.body;
+    const decryptedData = JSON.parse(decrypt(req.body.encryptedData));
+    const { name, lastname, email, username, password, roles, phone, address } = decryptedData;
   
     try {
       // Iniciar una transacción
-      await db.query('BEGIN');
-      console.log("Password enviado:", password);
+      await db.query("BEGIN");
+  
       // Actualizar información del usuario en la tabla "users"
       const hashedPassword = password ? await hash(password, 10) : null;
       const queryUpdateUser = `
@@ -119,7 +130,7 @@ const updateUserInfoAndRole = async (req, res) => {
       }
   
       // Confirmar los cambios en la base de datos
-      await db.query('COMMIT');
+      await db.query("COMMIT");
   
       res
         .status(200)
@@ -128,13 +139,13 @@ const updateUserInfoAndRole = async (req, res) => {
           user: updatedUser,
         });
     } catch (error) {
-      console.log("Error updating user info and roles:", error.message);
-      res.status(500).json({ error: error.message });
-  
-      // Revertir los cambios en caso de error
-      await db.query('ROLLBACK');
-    }
-  };
+    console.log("Error updating user info and roles:", error.message);
+    res.status(500).json({ error: error.message });
+
+    // Revertir los cambios en caso de error
+    await db.query("ROLLBACK");
+  }
+};
 
 module.exports = {
   getUserRolesByUserId,
@@ -142,5 +153,4 @@ module.exports = {
   deleteUserRole,
   updateUserRole,
   updateUserInfoAndRole,
-  
 };

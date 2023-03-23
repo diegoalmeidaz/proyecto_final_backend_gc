@@ -23,12 +23,12 @@ exports.adminOrRenterAuth = async (req, res, next) => {
   try {
     const user = req.user;
 
-    if (user.role === "admin" || user.role === "renter" || user.role === "user") {
-      next();
+    if (user.role === "admin" || user.role === "renter") {
+      return next(); // Agrega 'return' aquí
     } else {
-      res.status(403).json({ error: "Acceso denegado: se requiere ser admin o renter." });
+      return res.status(403).json({ error: "Acceso denegado: se requiere ser admin o renter." });
     }
   } catch (error) {
-    res.status(500).json({ error: "Error en la autenticación de admin o renter." });
+    return res.status(500).json({ error: "Error en la autenticación de admin o renter." });
   }
 };

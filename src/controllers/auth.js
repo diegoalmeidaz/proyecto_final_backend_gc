@@ -2,14 +2,26 @@ const db = require('../db/pool');
 const { hash } = require('bcryptjs');
 const { sign } = require('jsonwebtoken');
 const { SECRET } = require('../constants/ports');
+const {SECRET_KEY} = require('../constants/ports');
+const CryptoJS = require('crypto-js');
+const { encrypt, decrypt } = require('../encryption/encryption');
+
+
+
 
 exports.getUsers = async (req, res) => {
   try {
     const { rows } = await db.query('select user_id, username, email from users');
 
+    const encryptedRows = rows.map(row => ({
+      user_id: row.user_id,
+      username: encrypt(row.username),
+      email: encrypt(row.email),
+    }));
+
     return res.status(200).json({
       success: true,
-      users: rows,
+      users: encryptedRows,
     });
   } catch (error) {
     console.log(error.message);
@@ -101,18 +113,26 @@ exports.logout = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   const user_id = parseInt(req.params.user_id, 10);
-  const { name, role } = req.body;
+  const { name, lastname, email, phone, address } = req.body;
 
   try {
-    const roleResult = await db.query('INSERT INTO roles (role_name) VALUES ($1) ON CONFLICT (role_name) DO NOTHING RETURNING role_id', [role]);
-    const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [role])).rows[0].role_id;
+    const { rows } = await db.query('UPDATE users SET name = $1, lastname = $2, email = $3, phone = $4, address = $5 WHERE user_id = $6 RETURNING *', [name, lastname, email, phone, address, user_id]);
 
-    const { rows } = await db.query('UPDATE users SET name = $1 WHERE user_id = $2 RETURNING *', [name, user_id]); // Eliminamos la columna 'rol'
-    res.json(rows[0]);
+    const updatedUser = {
+      ...rows[0],
+      name: rows[0].name,
+      lastname: rows[0].lastname,
+      email: rows[0].email,
+      phone: rows[0].phone,
+      address: rows[0].address,
+    };
+
+    res.json(updatedUser);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.deleteUser = async (req, res) => {
   
@@ -183,5 +203,25 @@ exports.getUserInfo = async (req, res) => {
     });
   }
 };
+
+
+exports.updatePassword = async (req, res) => {
+  const user_id = parseInt(req.params.user_id, 10);
+  const { newPassword } = req.body;
+
+  console.log('user_id:', user_id); // Mostrará el user_id en la consola del servidor
+  console.log('newPassword:', newPassword); // Mostrará la contraseña nueva en la consola del servidor
+
+  try {
+    const hashedPassword = await hash(newPassword, 10); // Cambia bcrypt.hash por hash
+    const { rows } = await db.query('UPDATE users SET password = $1 WHERE user_id = $2 RETURNING *', [hashedPassword, user_id]);
+
+    res.status(200).json({ message: 'Contraseña actualizada exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 
