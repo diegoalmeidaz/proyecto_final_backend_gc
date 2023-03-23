@@ -93,7 +93,7 @@ exports.update = async (req, res) => {
     user_id,
     purchase_price_paid_by_renter,
   } = req.body;
-  console.log("Datos recibidos del front-end:", req.body); // console log para ver que es lo que estamos recibiendo del front.
+  // console.log("Datos recibidos del front-end:", req.body); // console log para ver que es lo que estamos recibiendo del front.
 
   try {
     const { rows } = await db.query(

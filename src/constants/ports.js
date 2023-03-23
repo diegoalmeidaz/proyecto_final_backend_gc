@@ -3,9 +3,9 @@ config()
 
 
 module.exports = {
-  PORT: process.env.PORT,
-  SERVER_URL: process.env.SERVER_URL,
-  CLIENT_URL: process.env.SERVER_URL,
-  SECRET: "6742890",
-  SECRET_KEY: process.env.SECRET_KEY,
+  PORT: '8000',
+  SERVER_URL: 'http://localhost:8000',
+  CLIENT_URL: 'http://localhost:3000',
+  SECRET: '6742890',
+  SECRET_KEY: 'aXveryXcomplexXandXlongXsecretXkey123',
 }

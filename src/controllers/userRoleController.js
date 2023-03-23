@@ -16,10 +16,10 @@ const getUserRolesByUserId = async (req, res) => {
     const { rows } = await db.query(query, [user_id]);
 
     // Encriptar los datos antes de enviarlos al cliente
-    console.log("Datos antes de encriptar:", JSON.stringify(rows));
+    // console.log("Datos antes de encriptar:", JSON.stringify(rows));
     const encryptedData = encrypt(JSON.stringify(rows));
 
-    console.log("Datos después de encriptar:", encryptedData);
+    // console.log("Datos después de encriptar:", encryptedData);
 
     res.status(200).json({ encryptedData });
   } catch (error) {

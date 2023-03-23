@@ -209,8 +209,8 @@ exports.updatePassword = async (req, res) => {
   const user_id = parseInt(req.params.user_id, 10);
   const { newPassword } = req.body;
 
-  console.log('user_id:', user_id); // Mostrará el user_id en la consola del servidor
-  console.log('newPassword:', newPassword); // Mostrará la contraseña nueva en la consola del servidor
+  // console.log('user_id:', user_id); // Mostrará el user_id en la consola del servidor
+  // console.log('newPassword:', newPassword); // Mostrará la contraseña nueva en la consola del servidor
 
   try {
     const hashedPassword = await hash(newPassword, 10); // Cambia bcrypt.hash por hash
