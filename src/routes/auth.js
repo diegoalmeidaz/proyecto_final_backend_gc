@@ -3,12 +3,12 @@ const {
   getUsers,
   register,
   login,
-  protected,
   logout,
   updateUser,
   deleteUser,
   getUserInfo,
-  updatePassword, // Importa la función updatePassword aquí
+  updatePassword,
+  protectedRoute, 
 } = require('../controllers/auth')
 const {
   validationMiddleware,
@@ -18,7 +18,7 @@ const { userAuth, adminAuth } = require('../middlewares/auth-middleware')
 const router = Router()
 
 router.get('/get-users', getUsers)
-router.get('/protected', userAuth, protected)
+router.get('/protected', userAuth, protectedRoute)
 router.post('/register', registerValidation, validationMiddleware, register)
 router.post('/login', loginValidation, validationMiddleware, login)
 router.get('/logout', logout)

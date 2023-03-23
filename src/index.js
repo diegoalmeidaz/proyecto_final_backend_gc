@@ -1,3 +1,4 @@
+// index.js
 const express = require("express");
 const app = express();
 const { PORT, CLIENT_URL } = require("./constants/ports");
@@ -7,12 +8,11 @@ require("./middlewares/passport-middleware");
 const cors = require("cors");
 const db = require("./db/pool");
 
-
 const authRoutes = require("./routes/auth");
 const productRoutes = require("./routes/items");
 const ordersRouter = require("./routes/orders");
 const roleRouter = require('./routes/role');
-const userRoleRouter = require('./routes/userRole'); 
+const userRoleRouter = require('./routes/userRole');
 
 // Configura los middleware
 app.use(express.json());
@@ -22,13 +22,16 @@ app.use(passport.initialize());
 
 // Inicializa las rutas
 app.use("/users", authRoutes);
-app.use("/items", productRoutes); 
-app.use("/orders", ordersRouter); 
+app.use("/items", productRoutes);
+app.use("/orders", ordersRouter);
 app.use('/roles', roleRouter);
 app.use('/user_roles', userRoleRouter);
 
+// Exporta la aplicación Express
+module.exports = app;
+
 // Inicia el servidor
-const appStart = () => {
+const startServer = () => {
   try {
     app.listen(PORT, () => {
       console.log(`El servidor está escuchando en el puerto ${PORT}`);
@@ -48,4 +51,4 @@ db.query("SELECT NOW()", (err, res) => {
 });
 
 // Inicia la aplicación
-appStart();
+startServer();

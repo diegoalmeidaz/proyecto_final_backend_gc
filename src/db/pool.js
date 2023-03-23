@@ -21,4 +21,6 @@ module.exports = {
     const res = await pool.query(text, params);
     return res.rows;
   },
+  pool,
 };
+  
