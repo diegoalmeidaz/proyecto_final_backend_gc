@@ -83,62 +83,62 @@ const updateUserRole = async (req, res) => {
 };
 
 const updateUserInfoAndRole = async (req, res) => {
-    const user_id = parseInt(req.params.user_id, 10);
-    const decryptedData = JSON.parse(decrypt(req.body.encryptedData));
-    const { name, lastname, email, username, password, roles, phone, address } = decryptedData;
-  
-    try {
-      // Iniciar una transacción
-      await db.query("BEGIN");
-  
-      // Actualizar información del usuario en la tabla "users"
-      const hashedPassword = password ? await hash(password, 10) : null;
-      const queryUpdateUser = `
-          UPDATE users SET
-            name = COALESCE($1, name),
-            lastname = COALESCE($2, lastname),
-            email = COALESCE($3, email),
-            username = COALESCE($4, username),
-            password = COALESCE($5, password),
-            phone = COALESCE($6, phone),
-            address = COALESCE($7, address)
-          WHERE user_id = $8
-          RETURNING *
-        `;
-      const { rows: updatedUserRows } = await db.query(queryUpdateUser, [
-        name,
-        lastname,
-        email,
-        username,
-        hashedPassword,
-        phone,
-        address,
-        user_id,
-      ]);
-      const updatedUser = updatedUserRows[0];
-  
-      // Actualizar roles del usuario en la tabla "user_roles"
-      if (roles && Array.isArray(roles)) {
-        const queryDeleteRoles = "DELETE FROM user_roles WHERE user_id = $1";
-        await db.query(queryDeleteRoles, [user_id]);
-  
-        const queryInsertRole =
-          "INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)";
-        for (const role_id of roles) {
-          await db.query(queryInsertRole, [user_id, role_id]);
-        }
+  const user_id = parseInt(req.params.user_id, 10);
+  const decryptedData = decrypt(req.body.encryptedData);
+  const { name, lastname, email, username, password, roles, phone, address } = decryptedData;
+
+  try {
+    // Iniciar una transacción
+    await db.query("BEGIN");
+
+    // Actualizar información del usuario en la tabla "users"
+    const hashedPassword = password ? await hash(password, 10) : null;
+    const queryUpdateUser = `
+        UPDATE users SET
+          name = COALESCE($1, name),
+          lastname = COALESCE($2, lastname),
+          email = COALESCE($3, email),
+          username = COALESCE($4, username),
+          password = COALESCE($5, password),
+          phone = COALESCE($6, phone),
+          address = COALESCE($7, address)
+        WHERE user_id = $8
+        RETURNING *
+      `;
+    const { rows: updatedUserRows } = await db.query(queryUpdateUser, [
+      name,
+      lastname,
+      email,
+      username,
+      hashedPassword,
+      phone,
+      address,
+      user_id,
+    ]);
+    const updatedUser = updatedUserRows[0];
+
+    // Actualizar roles del usuario en la tabla "user_roles"
+    if (roles && Array.isArray(roles)) {
+      const queryDeleteRoles = "DELETE FROM user_roles WHERE user_id = $1";
+      await db.query(queryDeleteRoles, [user_id]);
+
+      const queryInsertRole =
+        "INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)";
+      for (const role_id of roles) {
+        await db.query(queryInsertRole, [user_id, role_id]);
       }
-  
-      // Confirmar los cambios en la base de datos
-      await db.query("COMMIT");
-  
-      res
-        .status(200)
-        .json({
-          message: "User info and roles updated successfully",
-          user: updatedUser,
-        });
-    } catch (error) {
+    }
+
+    // Confirmar los cambios en la base de datos
+    await db.query("COMMIT");
+
+    res
+      .status(200)
+      .json({
+        message: "User info and roles updated successfully",
+        user: updatedUser,
+      });
+  } catch (error) {
     console.log("Error updating user info and roles:", error.message);
     res.status(500).json({ error: error.message });
 
@@ -146,6 +146,7 @@ const updateUserInfoAndRole = async (req, res) => {
     await db.query("ROLLBACK");
   }
 };
+
 
 module.exports = {
   getUserRolesByUserId,

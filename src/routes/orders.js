@@ -10,6 +10,7 @@ const {
   getOrdersByAdmin,
   updateOrderStatus,
   updateOrder,
+  getOrders, 
 } = require("../controllers/orderController");
 
 const isAdmin = (req, res, next) => {
@@ -19,6 +20,20 @@ const isAdmin = (req, res, next) => {
     res.status(403).json({ message: "Acceso no autorizado" });
   }
 };
+
+router.get(
+  "/admin",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
+  getOrdersByAdmin
+);
+
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
+  getOrders
+);
 
 router.get(
   "/:order_id",
@@ -42,13 +57,6 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   isAdmin,
   deleteOrder
-);
-
-router.get(
-  "/admin",
-  passport.authenticate("jwt", { session: false }),
-  isAdmin,
-  getOrdersByAdmin
 );
 
 router.put(

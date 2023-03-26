@@ -289,6 +289,8 @@ async function getRoleByUserId(user_id) {
   }
 }
 
+
+
 async function applyFilters(
   products,
   { query, sort, colors, sizes, minPrice, maxPrice, brands, independentFilter }
@@ -328,12 +330,12 @@ async function applyFilters(
     // Obtenemos el role_id del usuario utilizando la función getRoleByUserId
     const role_id = await getRoleByUserId(product.user_id);
 
-    // Aplica la lógica basada en el rol aquí utilizando el valor de role_id
-    // ...
+    
 
     filteredProducts.push(product);
   }
 
+  
   return filteredProducts.sort((a, b) => {
     const { name, price } = a;
     const { name: nameB, price: priceB } = b;

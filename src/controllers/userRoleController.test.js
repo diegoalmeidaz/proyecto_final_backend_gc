@@ -16,7 +16,7 @@ test("should update user info and roles successfully", async () => {
 
   // Encriptar los datos antes de enviarlos a la función
   const encryptedData = encrypt(updatedInfo);
-  // console.log("Datos encriptados:", encryptedData);
+  console.log("Datos encriptados:", encryptedData);
 
   // Simular la petición y la respuesta
   const req = {
