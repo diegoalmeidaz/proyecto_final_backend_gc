@@ -20,6 +20,7 @@ const router = Router()
 router.get('/get-users', getUsers)
 router.get('/protected', userAuth, protectedRoute)
 router.post('/register', registerValidation, validationMiddleware, register)
+router.post('/register_admin', registerValidation, validationMiddleware, register)
 router.post('/login', loginValidation, validationMiddleware, login)
 router.get('/logout', logout)
 router.put('/updateinfo/:user_id', updateUser);

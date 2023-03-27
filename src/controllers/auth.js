@@ -60,6 +60,41 @@ exports.register = async (req, res) => {
   }
 };
 
+exports.register_admin = async (req, res) => {
+  const { email, password, username, name, lastname, role } = req.body;
+
+  try {
+    const hashedPassword = await hash(password, 10);
+
+    const role_name = role || 'admin';
+
+    const roleResult = await db.query('INSERT INTO roles (role_name) VALUES ($1) ON CONFLICT (role_name) DO NOTHING RETURNING role_id', [role_name]);
+    const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [role_name])).rows[0].role_id;
+
+    const userResult = await db.query(
+      'INSERT INTO users(email, password, username, name, lastname) VALUES ($1, $2, $3, $4, $5) RETURNING user_id', // Eliminamos la columna 'role'
+      [email, hashedPassword, username, name, lastname]
+    );
+
+    const userId = userResult.rows[0].user_id;
+
+    await db.query('INSERT INTO user_roles(user_id, role_id) VALUES ($1, $2)', [userId, roleId]);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Registration successful',
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+
+
+
 exports.login = async (req, res) => {
   let user = req.user;
 

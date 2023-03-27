@@ -113,23 +113,15 @@ exports.deleteOrder = async (req, res) => {
   const { order_id } = req.params;
 
   try {
-    // Inicia la transacción
     await db.query("BEGIN");
 
-    // Elimina los detalles de la orden asociados con la orden
     await db.query("DELETE FROM order_details WHERE order_id = $1", [order_id]);
-
-    // Elimina la orden
     await db.query("DELETE FROM orders WHERE order_id = $1", [order_id]);
-
-    // Confirma la transacción
     await db.query("COMMIT");
 
     res.status(200).json({ message: "Orden eliminada correctamente" });
   } catch (error) {
     console.error(error);
-
-    // Si hay algún error, revierte la transacción
     await db.query("ROLLBACK");
 
     res.status(500).json({ message: "Error al eliminar la orden" });
@@ -154,7 +146,7 @@ exports.updateOrderStatus = async (req, res) => {
   const { order_status } = req.body;
 
   try {
-    console.log("Executing updateOrderStatus query:", order_status, order_id); // Agregar registro de depuración
+    console.log("Executing updateOrderStatus query:", order_status, order_id); // console log a esconder
     await db.query("UPDATE orders SET order_status = $1 WHERE order_id = $2", [
       order_status,
       order_id,
@@ -163,7 +155,7 @@ exports.updateOrderStatus = async (req, res) => {
       .status(200)
       .json({ message: "Estado de la orden actualizado correctamente" });
   } catch (error) {
-    console.error("Error in updateOrderStatus:", error); // Agregar registro de depuración
+    console.error("Error in updateOrderStatus:", error); 
     res
       .status(500)
       .json({ message: "Error al actualizar el estado de la orden" });
@@ -182,7 +174,7 @@ exports.updateOrder = async (req, res) => {
       visit_date_txt,
       rental_date_txt,
       order_id
-    ); // Agregar registro de depuración
+    ); 
     const result = await db.query(
       "UPDATE orders SET visit_date = $1, rental_date = $2, visit_date_txt = $3, rental_date_txt = $4 WHERE order_id = $5 RETURNING *",
       [visit_date, rental_date, visit_date_txt, rental_date_txt, order_id]
@@ -194,13 +186,13 @@ exports.updateOrder = async (req, res) => {
 
     const order = result.rows[0];
 
-    // Desencriptar la información sensible antes de enviarla al cliente
+    
     const decryptedData = decryptSensitiveData(order);
     const responseOrder = { ...order, ...decryptedData };
 
     res.status(200).json(responseOrder);
   } catch (error) {
-    console.error("Error in updateOrder:", error); // Agregar registro de depuración
+    console.error("Error in updateOrder:", error);
     res.status(500).json({ error: "Error al actualizar la orden" });
   }
 };
