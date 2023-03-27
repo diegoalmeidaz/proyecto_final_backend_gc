@@ -10,7 +10,8 @@ const {
   getOrdersByAdmin,
   updateOrderStatus,
   updateOrder,
-  getOrders, 
+  getOrders,
+  getOrdersByUser
 } = require("../controllers/orderController");
 
 const isAdmin = (req, res, next) => {
@@ -39,6 +40,12 @@ router.get(
   "/:order_id",
   passport.authenticate("jwt", { session: false }),
   getOrderById
+);
+
+router.get(
+  "/user/:user_id",
+  passport.authenticate("jwt", { session: false }),
+  getOrdersByUser
 );
 
 router.post(
