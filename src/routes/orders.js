@@ -11,7 +11,9 @@ const {
   updateOrderStatus,
   updateOrder,
   getOrders,
-  getOrdersByUser
+  getOrdersByUser,
+  getOrdersWithDetails,
+  createOrderWithDetails
 } = require("../controllers/orderController");
 
 const isAdmin = (req, res, next) => {
@@ -73,6 +75,7 @@ router.put(
   updateOrderStatus
 );
 
+
 // Ruta para actualizar una orden
 router.put(
   "/:order_id",
@@ -80,4 +83,25 @@ router.put(
   updateOrder
 );
 
+
+router.get(
+  "/details",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
+  getOrdersWithDetails
+);
+
 module.exports = router;
+
+
+router.post(
+  "/with-details",
+  passport.authenticate("jwt", { session: false }),
+  [
+    check("order.user_id").notEmpty(),
+    check("order.total_price").notEmpty(),
+    check("order.status_order").notEmpty(),
+    check("orderDetails").isArray({ min: 1 }),
+  ],
+  createOrderWithDetails
+);

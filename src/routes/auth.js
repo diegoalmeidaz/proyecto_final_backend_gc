@@ -9,6 +9,7 @@ const {
   getUserInfo,
   updatePassword,
   protectedRoute, 
+  getUserInfoById,
 } = require('../controllers/auth')
 const {
   validationMiddleware,
@@ -27,5 +28,6 @@ router.put('/updateinfo/:user_id', updateUser);
 router.delete('/auth/delete/:user_id', userAuth, adminAuth, deleteUser);
 router.get('/me', userAuth, getUserInfo);
 router.put('/:user_id/password', updatePassword);
+router.get('/user/:user_id', getUserInfoById);
 
 module.exports = router

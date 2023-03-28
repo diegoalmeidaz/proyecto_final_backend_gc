@@ -57,12 +57,65 @@ exports.getOrderById = async (req, res) => {
   }
 };
 
-exports.createOrder = async (req, res) => {
-  console.log("In createOrder:", req.body); // Comentar console Log
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+// exports.createOrder = async (req, res) => {
+//   console.log("In createOrder:", req.body); // Comentar console Log
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     return res.status(400).json({ errors: errors.array() });
+//   }
+
+//   const {
+//     user_id,
+//     visit_date,
+//     rental_date,
+//     visit_date_txt,
+//     rental_date_txt,
+//     total_price,
+//     status_order,
+//     return_date,
+//     return_condition,
+//     delivery_address,
+//     payment_method,
+//   } = req.body;
+
+//   const encryptedData = encryptSensitiveData({
+//     delivery_address,
+//     payment_method,
+//   });
+
+//   const query = `INSERT INTO orders (user_id, visit_date, rental_date, visit_date_txt, rental_date_txt, total_price, status_order, return_date, return_condition, delivery_address, payment_method)
+//     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`;
+//   const values = [
+//     user_id,
+//     visit_date,
+//     rental_date,
+//     visit_date_txt,
+//     rental_date_txt,
+//     total_price,
+//     status_order,
+//     return_date,
+//     return_condition,
+//     encryptedData.delivery_address,
+//     encryptedData.payment_method,
+//   ];
+
+//   try {
+//     console.log("Executing createOrder query:", query, values); // Comentar Console log
+//     const result = await db.query(query, values);
+//     res.status(201).json(result.rows[0]);
+//   } catch (error) {
+//     console.error("Error in createOrder:", error); // Comentar console log
+//     res.status(500).json({ error: "Error al crear la orden" });
+//   }
+// };
+
+
+
+
+exports.createOrder = async (order) => {
+  console.log("In createOrder:", order);
+  console.log("Order object in createOrder:", order); // Añadir aquí
+  console.log('Order before destructuring:', order);
 
   const {
     user_id,
@@ -76,7 +129,7 @@ exports.createOrder = async (req, res) => {
     return_condition,
     delivery_address,
     payment_method,
-  } = req.body;
+  } = order;
 
   const encryptedData = encryptSensitiveData({
     delivery_address,
@@ -100,14 +153,21 @@ exports.createOrder = async (req, res) => {
   ];
 
   try {
-    console.log("Executing createOrder query:", query, values); // Comentar Console log
-    const result = await db.query(query, values);
-    res.status(201).json(result.rows[0]);
+    console.log("Executing createOrder query:", query, values);
+    const result = await db.query(query, values); // Asegúrate de tener "await" aquí
+    console.log("Result from createOrder query:", result); // Añadir este console.log
+    return result.rows[0];
   } catch (error) {
-    console.error("Error in createOrder:", error); // Comentar console log
-    res.status(500).json({ error: "Error al crear la orden" });
+    console.error("Error in createOrder:", error);
+    throw error;
   }
 };
+
+
+
+
+
+
 
 exports.deleteOrder = async (req, res) => {
   const { order_id } = req.params;
@@ -232,13 +292,126 @@ exports.getOrdersByUser = async (req, res) => {
     }
 
     // Desencriptar la información sensible antes de enviarla al cliente
-    const decryptedOrders = rows.map((order) => {
+    const decryptedOrders = await Promise.all(rows.map(async (order) => {
       const decryptedData = decryptSensitiveData(order);
-      return { ...order, ...decryptedData };
-    });
+      
+      const orderDetailsResult = await db.query(
+        "SELECT * FROM order_details WHERE order_id = $1",
+        [order.order_id]
+      );
+      const orderDetails = orderDetailsResult.rows;
+
+      return { ...order, ...decryptedData, orderDetails };
+    }));
 
     res.json(decryptedOrders);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+
+exports.getOrdersWithDetails = async (req, res) => {
+  try {
+    const ordersResult = await db.query("SELECT * FROM orders");
+    const orders = ordersResult.rows;
+
+    console.log('orders:', orders);
+
+    const ordersWithDetails = await Promise.all(
+      orders.map(async (order) => {
+        console.log('order.order_id:', order.order_id);
+
+        const orderDetailsResult = await db.query(
+          "SELECT * FROM order_details WHERE order_details.order_id = $1",
+          [order.order_id]
+        );
+        const orderDetails = orderDetailsResult.rows;
+
+        return { ...order, orderDetails };
+      })
+    );
+
+    res.json(ordersWithDetails);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+// exports.createOrderWithDetails = async (req, res) => {
+//   console.log("In createOrderWithDetails:", req.body); // Comentar console Log
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     return res.status(400).json({ errors: errors.array() });
+//   }
+
+//   const { order, orderDetails } = req.body;
+
+//   try {
+//     // Crear la orden utilizando la función createOrder que ya tienes
+//     const createdOrder = await createOrder(order);
+
+    
+//     await exports.createOrderDetails(createdOrder.order_id, orderDetails);
+
+//     res.status(201).json(createdOrder);
+//   } catch (error) {
+//     console.error("Error in createOrderWithDetails:", error); // Comentar console log
+//     res.status(500).json({ error: "Error al crear la orden y sus detalles" });
+//   }
+// };
+
+
+exports.createOrderWithDetails = async (req, res) => {
+  console.log("In createOrderWithDetails:", req.body);
+
+  const {
+    user_id,
+    total_price,
+    status_order,
+    delivery_address,
+    payment_method,
+    visit_date,
+    rental_date,
+    visit_date_txt,
+    rental_date_txt,
+    return_date,
+    return_condition,
+    order_details,
+  } = req.body;
+
+  const order = {
+    user_id,
+    total_price,
+    status_order,
+    delivery_address,
+    payment_method,
+    visit_date,
+    rental_date,
+    visit_date_txt,
+    rental_date_txt,
+    return_date,
+    return_condition,
+  };
+
+  console.log("Order object in createOrderWithDetails:", order); // Añadir aquí
+
+  try {
+    await db.query("BEGIN");
+
+    const createdOrder = await exports.createOrder(order);
+
+    await exports.createOrderDetails(createdOrder.order_id, order_details);
+
+    await db.query("COMMIT");
+
+    res.status(201).json(createdOrder);
+  } catch (error) {
+    console.error("Error in createOrderWithDetails:", error);
+
+    await db.query("ROLLBACK");
+
+    res.status(500).json({ error: "Error al crear la orden y sus detalles" });
   }
 };

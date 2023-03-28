@@ -257,6 +257,42 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
+exports.getUserInfoById = async (req, res) => {
+  try {
+    const userId = req.params.user_id;
+    const { rows } = await db.query(`
+      SELECT users.user_id, users.username, users.email, users.name, users.lastname, roles.role_name
+      FROM users
+      INNER JOIN user_roles ON users.user_id = user_roles.user_id
+      INNER JOIN roles ON user_roles.role_id = roles.role_id
+      WHERE users.user_id = $1
+    `, [userId]);
 
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    const userInfo = rows[0];
+    return res.status(200).json({
+      success: true,
+      user: {
+        user_id: userInfo.user_id,
+        username: userInfo.username,
+        email: userInfo.email,
+        role: userInfo.role_name,
+        name: userInfo.name,
+        lastname: userInfo.lastname,
+      },
+    });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      error: error.message,
+    });
+  }
+};
 
 
