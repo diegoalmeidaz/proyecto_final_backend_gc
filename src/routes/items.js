@@ -96,8 +96,90 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /items/{item_id}:
+ *   get:
+ *     summary: Obtiene un producto específico por ID.
+ *     description: Devuelve un producto específico almacenado en la base de datos utilizando su ID.
+ *     tags:
+ *       - Items
+ *     parameters:
+ *       - in: path
+ *         name: item_id
+ *         description: ID del producto.
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Producto encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       '404':
+ *         description: Producto no encontrado.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       '500':
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+
+
+
 // GET - obtener un ítem específico por ID
 router.get("/:item_id", itemController.getById);
+
+
+/**
+ * @swagger
+ * /items:
+ *   post:
+ *     summary: Agregar un nuevo producto.
+ *     description: Agrega un nuevo producto a la base de datos.
+ *     tags:
+ *       - Items
+ *     requestBody:
+ *       description: Datos del nuevo producto.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Product'
+ *     responses:
+ *       '200':
+ *         description: Producto creado con éxito.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       '500':
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+
 
 
 // POST - agregar un nuevo producto
@@ -115,6 +197,50 @@ function buildUpdateQuery(table, id, data) {
   return { query, values };
 }
 
+
+
+/**
+ * @swagger
+ * /items/{item_id}:
+ *   put:
+ *     summary: Actualizar un producto existente.
+ *     description: Actualiza la información de un producto existente en la base de datos.
+ *     tags:
+ *       - Items
+ *     parameters:
+ *       - in: path
+ *         name: item_id
+ *         description: ID del producto.
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       description: Datos actualizados del producto.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Product'
+ *     responses:
+ *       '200':
+ *         description: Producto actualizado con éxito.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       '500':
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+
+
+
 // PUT - actualizar un producto existente
 router.put("/:item_id", async (req, res) => {
   try {
@@ -127,6 +253,46 @@ router.put("/:item_id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+/**
+ * @swagger
+ * /items/{item_id}:
+ *   delete:
+ *     summary: Eliminar un producto.
+ *     description: Elimina un producto de la base de datos utilizando su ID.
+ *     tags:
+ *       - Items
+ *     parameters:
+ *       - in: path
+ *         name: item_id
+ *         description: ID del producto.
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Producto eliminado con éxito.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       '500':
+ *         description: Error interno del servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ */
+
 
 // DELETE - eliminar un producto
 router.delete("/:item_id", itemController.delete);

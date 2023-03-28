@@ -174,6 +174,8 @@ router.post('/register', registerValidation, validationMiddleware, register)
  *       - Auth
  *     summary: Registro de administrador
  *     description: Registra a un nuevo usuario con el rol de administrador
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -197,6 +199,8 @@ router.post('/register_admin', registerValidation, validationMiddleware, registe
  *       - Auth
  *     summary: Iniciar sesión
  *     description: Inicia sesión con un usuario existente
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -327,6 +331,8 @@ router.get('/me', userAuth, getUserInfo);
  *       - Auth
  *     summary: Actualizar contraseña
  *     description: Actualiza la contraseña del usuario especificado por user_id
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: user_id
@@ -358,6 +364,8 @@ router.put('/:user_id/password', updatePassword);
  *       - Auth
  *     summary: Obtener información de usuario por ID
  *     description: Devuelve la información del usuario especificado por user_id
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: user_id
