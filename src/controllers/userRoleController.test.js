@@ -2,7 +2,7 @@ const { encrypt } = require("../encryption/encryption");
 const { updateUserInfoAndRole } = require("../controllers/userRoleController");
 
 test("should update user info and roles successfully", async () => {
-  // Preparar los datos de prueba
+
   const userId = 13;
   const updatedInfo = {
     name: "Updated Name",
@@ -14,11 +14,11 @@ test("should update user info and roles successfully", async () => {
     address: "Updated Address",
   };
 
-  // Encriptar los datos antes de enviarlos a la función
+ 
   const encryptedData = encrypt(updatedInfo);
-  console.log("Datos encriptados:", encryptedData);
+  // console.log("Datos encriptados:", encryptedData);
 
-  // Simular la petición y la respuesta
+ 
   const req = {
     params: { user_id: userId },
     body: { encryptedData },
@@ -28,10 +28,10 @@ test("should update user info and roles successfully", async () => {
     json: jest.fn(),
   };
 
-  // Llamar a la función updateUserInfoAndRole
+
   await updateUserInfoAndRole(req, res);
 
-  // Comprobar si se devuelve el código de estado correcto y la respuesta correcta
+ 
   expect(res.status).toHaveBeenCalledWith(200);
   expect(res.json).toHaveBeenCalledWith({
     message: "User info and roles updated successfully",

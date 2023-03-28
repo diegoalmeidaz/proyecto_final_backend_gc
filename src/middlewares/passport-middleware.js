@@ -19,7 +19,7 @@ passport.use(
   'jwt',
   new Strategy(opts, async ({ id }, done) => {
     try {
-      console.log('Decoded JWT:', { id });
+     //  console.log('Decoded JWT:', { id });
       const { rows } = await db.query(
         `
         SELECT users.user_id, users.username, roles.role_name 
@@ -39,7 +39,7 @@ passport.use(
 
       let user = { id: rows[0].user_id, username: rows[0].username, role: rows[0].role_name };
 
-      console.log('User object:', user);
+      // console.log('User object:', user);
 
       return await done(null, user);
     } catch (error) {

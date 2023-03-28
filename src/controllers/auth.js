@@ -72,7 +72,7 @@ exports.register_admin = async (req, res) => {
     const roleId = roleResult.rowCount > 0 ? roleResult.rows[0].role_id : (await db.query('SELECT role_id FROM roles WHERE role_name = $1', [role_name])).rows[0].role_id;
 
     const userResult = await db.query(
-      'INSERT INTO users(email, password, username, name, lastname) VALUES ($1, $2, $3, $4, $5) RETURNING user_id', // Eliminamos la columna 'role'
+      'INSERT INTO users(email, password, username, name, lastname) VALUES ($1, $2, $3, $4, $5) RETURNING user_id', 
       [email, hashedPassword, username, name, lastname]
     );
 

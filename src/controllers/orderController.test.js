@@ -15,14 +15,14 @@ const testUser = {
 };
 
 beforeAll(async () => {
-  // Insert test data in orders table
+ 
   const orderQuery = `
     INSERT INTO orders (order_id, user_id, total_price, status_order)
     VALUES (1, 20, 1000, 'Test status');
   `;
   await pool.query(orderQuery);
 
-  // Insert test data in items table
+ 
   const itemQuery = `
   INSERT INTO items (
     item_id, name, color, price, category, src, is_liked, purchase_year, purchase_country,
@@ -38,7 +38,7 @@ beforeAll(async () => {
 `;
   await pool.query(itemQuery);
 
-  // Insert test data in order_details table
+
   const orderDetailsQuery = `
     INSERT INTO order_details (order_id, item_id, quantity, price)
     VALUES (1, 50, 1, 1500);
@@ -49,7 +49,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  // Delete test data from order_details and orders tables
+ 
   const orderDetailsQuery = `
     DELETE FROM order_details
     WHERE order_id = 1;
@@ -62,7 +62,7 @@ afterAll(async () => {
   `;
   await pool.query(orderQuery);
 
-  // Delete test data from items table
+  
   const itemQuery = `
     DELETE FROM items
     WHERE item_id = 50;

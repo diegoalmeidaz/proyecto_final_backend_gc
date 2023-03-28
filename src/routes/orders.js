@@ -13,11 +13,14 @@ const {
   getOrders,
   getOrdersByUser,
   getOrdersWithDetails,
-  createOrderWithDetails
+  createOrderWithDetails, 
+  getOrderDetails,
+  testOrderDetails, 
+  getOrderDetailsById
 } = require("../controllers/orderController");
 
 const isAdmin = (req, res, next) => {
-  console.log('Checking if user is admin'); // Agrega este registro de depuración
+  // console.log('Checking if user is admin'); 
   if (req.user.role === "admin") {
     next();
   } else {
@@ -90,13 +93,15 @@ router.put(
 router.get(
   "/details",
   passport.authenticate("jwt", { session: false }),
-  isAdmin, // Agrega este registro de depuración
-  (req, res, next) => {
-    console.log('Processing /details route');
-    next();
-  },
+  isAdmin,
   getOrdersWithDetails
 );
+
+router.get("/test-order-details", testOrderDetails);
+
+
+
+
 
 router.post(
   "/with-details",
@@ -109,6 +114,27 @@ router.post(
   ],
   createOrderWithDetails
 );
+
+
+router.get(
+  "/details/all",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
+  getOrderDetails
+);
+
+router.get(
+  "/details/:order_id",
+  passport.authenticate("jwt", { session: false }),
+  getOrderDetailsById
+);
+
+
+
+
+
+
+
 
 
 

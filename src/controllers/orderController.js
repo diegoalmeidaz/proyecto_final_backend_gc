@@ -5,7 +5,7 @@ const { validationResult } = require("express-validator");
 const sensitiveColumns = ["delivery_address", "payment_method"];
 
 function encryptSensitiveData(data) {
-  console.log("In encryptSensitiveData:", data); // Comentar console log
+  //console.log("In encryptSensitiveData:", data); // Comentar console log
   return sensitiveColumns.reduce((acc, column) => {
     if (data[column]) {
       acc[column] = encrypt(data[column]);
@@ -15,7 +15,7 @@ function encryptSensitiveData(data) {
 }
 
 function decryptSensitiveData(data) {
-  console.log("In decryptSensitiveData:", data); // Comentar console log
+  //console.log("In decryptSensitiveData:", data); // Comentar console log
   return sensitiveColumns.reduce((acc, column) => {
     if (data[column]) {
       acc[column] = decrypt(data[column]);
@@ -63,9 +63,9 @@ exports.getOrderById = async (req, res) => {
 
 
 exports.createOrder = async (order) => {
-  console.log("In createOrder:", order);
-  console.log("Order object in createOrder:", order); // Añadir aquí
-  console.log('Order before destructuring:', order);
+  //console.log("In createOrder:", order);
+  //console.log("Order object in createOrder:", order); 
+  //console.log('Order before destructuring:', order);
 
   const {
     user_id,
@@ -103,9 +103,9 @@ exports.createOrder = async (order) => {
   ];
 
   try {
-    console.log("Executing createOrder query:", query, values);
-    const result = await db.query(query, values); // Asegúrate de tener "await" aquí
-    console.log("Result from createOrder query:", result); // Añadir este console.log
+    //console.log("Executing createOrder query:", query, values);
+    const result = await db.query(query, values); 
+    //console.log("Result from createOrder query:", result); 
     return result.rows[0];
   } catch (error) {
     console.error("Error in createOrder:", error);
@@ -156,7 +156,7 @@ exports.updateOrderStatus = async (req, res) => {
   const { status_order } = req.body;
 
   try {
-    console.log("Executing updateOrderStatus query:", status_order, order_id); // console log a esconder
+    //console.log("Executing updateOrderStatus query:", status_order, order_id); // console log a esconder
     await db.query("UPDATE orders SET status_order = $1 WHERE order_id = $2", [
       status_order, // Aquí estaba el error, estaba 'order_status'
       order_id,
@@ -178,14 +178,14 @@ exports.updateOrder = async (req, res) => {
   const { visit_date, rental_date, visit_date_txt, rental_date_txt } = req.body;
 
   try {
-    console.log(
-      "Executing updateOrder query:",
-      visit_date,
-      rental_date,
-      visit_date_txt,
-      rental_date_txt,
-      order_id
-    ); 
+    // console.log(
+    //   "Executing updateOrder query:",
+    //   visit_date,
+    //   rental_date,
+    //   visit_date_txt,
+    //   rental_date_txt,
+    //   order_id
+    // ); 
     const result = await db.query(
       "UPDATE orders SET visit_date = $1, rental_date = $2, visit_date_txt = $3, rental_date_txt = $4 WHERE order_id = $5 RETURNING *",
       [visit_date, rental_date, visit_date_txt, rental_date_txt, order_id]
@@ -262,32 +262,62 @@ exports.getOrdersByUser = async (req, res) => {
 };
 
 
+
 exports.getOrdersWithDetails = async (req, res) => {
   try {
-    const ordersResult = await db.query("SELECT * FROM orders");
-    const orders = ordersResult.rows;
+    const query = `SELECT orders.order_id, orders.created_at, orders.user_id,
+    order_details.order_detail_id, order_details.item_id, order_details.quantity, order_details.price
+    FROM orders
+    INNER JOIN order_details ON orders.order_id = order_details.order_id;`;
 
-    console.log('orders:', orders);
+    const result = await pool.query(query);
 
-    const ordersWithDetails = await Promise.all(
-      orders.map(async (order) => {
-        console.log('order.order_id:', order.order_id);
+    if (result.rows.length > 0) {
+      const orders = result.rows.reduce((acc, row) => {
+        if (!acc[row.order_id]) {
+          acc[row.order_id] = {
+            order_id: row.order_id,
+            created_at: row.created_at,
+            user_id: row.user_id,
+            order_details: []
+          };
+        }
 
-        const orderDetailsResult = await await db.query(`
-        SELECT orders.*, order_details.*
-        FROM orders
-        INNER JOIN order_details ON orders.order_id = order_details.order_id
-      `);
-        const orderDetails = orderDetailsResult.rows;
-        console.log('orderDetails:', orderDetails); // Agrega este registro de depuración
+        acc[row.order_id].order_details.push({
+          order_detail_id: row.order_detail_id,
+          item_id: row.item_id,
+          quantity: row.quantity,
+          price: row.price
+        });
 
-        return { ...order, orderDetails };
-      })
+        return acc;
+      }, {});
+
+      res.json(Object.values(orders));
+    } else {
+      res.status(404).json({ message: "No se encontraron órdenes con detalles." });
+    }
+  } catch (error) {
+    console.error("Error en getOrderWithDetails:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+exports.testOrderDetails = async (req, res) => {
+  try {
+    const ordersWithDetailsResult = await db.query(
+      `SELECT orders.order_id, orders.created_at, orders.user_id,
+       order_details.order_detail_id, order_details.item_id, order_details.quantity, order_details.price
+       FROM orders
+       INNER JOIN order_details ON orders.order_id = order_details.order_id`
     );
-
+    const ordersWithDetails = ordersWithDetailsResult.rows;
+    // console.log("testOrderDetails:", ordersWithDetails);
     res.json(ordersWithDetails);
   } catch (error) {
-    console.error('Error en getOrdersWithDetails:', error); // Agrega este registro de depuración
+    // console.error("Error en testOrderDetails:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -297,8 +327,61 @@ exports.getOrdersWithDetails = async (req, res) => {
 
 
 
+
+
+
+
+
+exports.getOrderDetails = async (req, res) => {
+  try {
+    const orderDetailsResult = await db.query(
+      `SELECT * FROM order_details`
+    );
+    const orderDetails = orderDetailsResult.rows;
+    // console.log("orderDetails:", orderDetails);
+
+    res.json(orderDetails);
+  } catch (error) {
+    console.error("Error en getOrderDetails:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+// getOrderDetailsById (GET)
+exports.getOrderDetailsById = async (req, res) => {
+  const order_id = parseInt(req.params.order_id, 10);
+
+  try {
+    const { rows } = await db.query(
+      "SELECT * FROM order_details WHERE order_id = $1",
+      [order_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    res.json(rows); // Devuelve el array completo de detalles de la orden
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
 exports.createOrderWithDetails = async (req, res) => {
-  console.log("In createOrderWithDetails:", req.body);
+ // console.log("In createOrderWithDetails:", req.body);
 
   const {
     user_id,
@@ -329,7 +412,7 @@ exports.createOrderWithDetails = async (req, res) => {
     return_condition,
   };
 
-  console.log("Order object in createOrderWithDetails:", order); // Añadir aquí
+  // console.log("Order object in createOrderWithDetails:", order); 
 
   try {
     await db.query("BEGIN");
