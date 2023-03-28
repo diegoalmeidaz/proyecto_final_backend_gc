@@ -31,7 +31,7 @@ passport.use(
         [id]
       );
 
-      console.log('Query result:', rows);
+      // console.log('Query result:', rows);
 
       if (!rows.length) {
         throw new Error('401 not authorized');
