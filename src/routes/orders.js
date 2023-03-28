@@ -17,12 +17,14 @@ const {
 } = require("../controllers/orderController");
 
 const isAdmin = (req, res, next) => {
+  console.log('Checking if user is admin'); // Agrega este registro de depuración
   if (req.user.role === "admin") {
     next();
   } else {
     res.status(403).json({ message: "Acceso no autorizado" });
   }
 };
+
 
 router.get(
   "/admin",
@@ -84,15 +86,17 @@ router.put(
 );
 
 
+
 router.get(
   "/details",
   passport.authenticate("jwt", { session: false }),
-  isAdmin,
+  isAdmin, // Agrega este registro de depuración
+  (req, res, next) => {
+    console.log('Processing /details route');
+    next();
+  },
   getOrdersWithDetails
 );
-
-module.exports = router;
-
 
 router.post(
   "/with-details",
@@ -105,3 +109,9 @@ router.post(
   ],
   createOrderWithDetails
 );
+
+
+
+
+
+module.exports = router;

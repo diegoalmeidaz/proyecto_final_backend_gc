@@ -57,57 +57,7 @@ exports.getOrderById = async (req, res) => {
   }
 };
 
-// exports.createOrder = async (req, res) => {
-//   console.log("In createOrder:", req.body); // Comentar console Log
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty()) {
-//     return res.status(400).json({ errors: errors.array() });
-//   }
 
-//   const {
-//     user_id,
-//     visit_date,
-//     rental_date,
-//     visit_date_txt,
-//     rental_date_txt,
-//     total_price,
-//     status_order,
-//     return_date,
-//     return_condition,
-//     delivery_address,
-//     payment_method,
-//   } = req.body;
-
-//   const encryptedData = encryptSensitiveData({
-//     delivery_address,
-//     payment_method,
-//   });
-
-//   const query = `INSERT INTO orders (user_id, visit_date, rental_date, visit_date_txt, rental_date_txt, total_price, status_order, return_date, return_condition, delivery_address, payment_method)
-//     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`;
-//   const values = [
-//     user_id,
-//     visit_date,
-//     rental_date,
-//     visit_date_txt,
-//     rental_date_txt,
-//     total_price,
-//     status_order,
-//     return_date,
-//     return_condition,
-//     encryptedData.delivery_address,
-//     encryptedData.payment_method,
-//   ];
-
-//   try {
-//     console.log("Executing createOrder query:", query, values); // Comentar Console log
-//     const result = await db.query(query, values);
-//     res.status(201).json(result.rows[0]);
-//   } catch (error) {
-//     console.error("Error in createOrder:", error); // Comentar console log
-//     res.status(500).json({ error: "Error al crear la orden" });
-//   }
-// };
 
 
 
@@ -323,11 +273,13 @@ exports.getOrdersWithDetails = async (req, res) => {
       orders.map(async (order) => {
         console.log('order.order_id:', order.order_id);
 
-        const orderDetailsResult = await db.query(
-          "SELECT * FROM order_details WHERE order_details.order_id = $1",
-          [order.order_id]
-        );
+        const orderDetailsResult = await await db.query(`
+        SELECT orders.*, order_details.*
+        FROM orders
+        INNER JOIN order_details ON orders.order_id = order_details.order_id
+      `);
         const orderDetails = orderDetailsResult.rows;
+        console.log('orderDetails:', orderDetails); // Agrega este registro de depuración
 
         return { ...order, orderDetails };
       })
@@ -335,33 +287,14 @@ exports.getOrdersWithDetails = async (req, res) => {
 
     res.json(ordersWithDetails);
   } catch (error) {
+    console.error('Error en getOrdersWithDetails:', error); // Agrega este registro de depuración
     res.status(500).json({ error: error.message });
   }
 };
 
 
-// exports.createOrderWithDetails = async (req, res) => {
-//   console.log("In createOrderWithDetails:", req.body); // Comentar console Log
-//   const errors = validationResult(req);
-//   if (!errors.isEmpty()) {
-//     return res.status(400).json({ errors: errors.array() });
-//   }
 
-//   const { order, orderDetails } = req.body;
 
-//   try {
-//     // Crear la orden utilizando la función createOrder que ya tienes
-//     const createdOrder = await createOrder(order);
-
-    
-//     await exports.createOrderDetails(createdOrder.order_id, orderDetails);
-
-//     res.status(201).json(createdOrder);
-//   } catch (error) {
-//     console.error("Error in createOrderWithDetails:", error); // Comentar console log
-//     res.status(500).json({ error: "Error al crear la orden y sus detalles" });
-//   }
-// };
 
 
 exports.createOrderWithDetails = async (req, res) => {
