@@ -203,12 +203,12 @@ exports.getOrdersByAdmin = async (req, res) => {
 
 exports.updateOrderStatus = async (req, res) => {
   const { order_id } = req.params;
-  const { order_status } = req.body;
+  const { status_order } = req.body;
 
   try {
-    console.log("Executing updateOrderStatus query:", order_status, order_id); // console log a esconder
-    await db.query("UPDATE orders SET order_status = $1 WHERE order_id = $2", [
-      order_status,
+    console.log("Executing updateOrderStatus query:", status_order, order_id); // console log a esconder
+    await db.query("UPDATE orders SET status_order = $1 WHERE order_id = $2", [
+      status_order, // Aquí estaba el error, estaba 'order_status'
       order_id,
     ]);
     res
@@ -221,6 +221,7 @@ exports.updateOrderStatus = async (req, res) => {
       .json({ message: "Error al actualizar el estado de la orden" });
   }
 };
+
 
 exports.updateOrder = async (req, res) => {
   const { order_id } = req.params;
