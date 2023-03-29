@@ -6,7 +6,7 @@ module.exports = {
   PORT: PORT_ENV,
   SERVER_URL: SERVER_URL,
   CLIENT_URL: CLIENT_URL,
-  SECRET: SECRET,
+  SECRET: '6742890',
   SECRET_KEY: SECRET_KEY,
 }
  // comentario de prueba nueva redirigida github
