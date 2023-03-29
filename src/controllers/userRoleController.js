@@ -117,7 +117,7 @@ const updateUserInfoAndRole = async (req, res) => {
     ]);
     const updatedUser = updatedUserRows[0];
 
-    // Actualizar roles del usuario en la tabla "user_roles"
+    
     if (roles && Array.isArray(roles)) {
       const queryDeleteRoles = "DELETE FROM user_roles WHERE user_id = $1";
       await db.query(queryDeleteRoles, [user_id]);
@@ -129,7 +129,7 @@ const updateUserInfoAndRole = async (req, res) => {
       }
     }
 
-    // Confirmar los cambios en la base de datos
+   
     await db.query("COMMIT");
 
     res
@@ -139,10 +139,10 @@ const updateUserInfoAndRole = async (req, res) => {
         user: updatedUser,
       });
   } catch (error) {
-    console.log("Error updating user info and roles:", error.message);
+   // console.log("Error updating user info and roles:", error.message);
     res.status(500).json({ error: error.message });
 
-    // Revertir los cambios en caso de error
+
     await db.query("ROLLBACK");
   }
 };

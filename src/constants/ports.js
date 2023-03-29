@@ -1,11 +1,11 @@
 const { config } = require('dotenv')
 config()
-
+const { PORT_ENV, SERVER_URL, CLIENT_URL, SECRET_ENV, SECRET_KEY } = process.env;
 
 module.exports = {
-  PORT: '8000',
-  SERVER_URL: 'http://localhost:8000',
-  CLIENT_URL: 'http://localhost:3000',
-  SECRET: '6742890',
-  SECRET_KEY: 'aXveryXcomplexXandXlongXsecretXkey123',
+  PORT: PORT_ENV,
+  SERVER_URL: SERVER_URL,
+  CLIENT_URL: CLIENT_URL,
+  SECRET: SECRET_ENV,
+  SECRET_KEY: SECRET_KEY,
 }

@@ -15,10 +15,10 @@ const getRoleById = async (req, res) => {
     const { role_id } = req.params;
     const roleIdAsNumber = parseInt(role_id, 10); // Convertir el role_id a número
     const query = 'SELECT * FROM roles WHERE role_id = $1';
-    const { rows } = await db.query(query, [roleIdAsNumber]); // Utilizar el roleIdAsNumber en lugar de role_id
+    const { rows } = await db.query(query, [roleIdAsNumber]); // Utilizar el roleIdAsNumber en vez del role_id
     const role = rows[0];
 
-    console.log('Resultado de la consulta:', rows);
+    // console.log('Resultado de la consulta:', rows);
 
     if (!role) {
       return res.status(404).json({ error: 'No se encontró el rol con el ID proporcionado.' });
