@@ -108,7 +108,12 @@ exports.login = async (req, res) => {
 
     return res
       .status(200)
-      .cookie('token', token, { httpOnly: true })
+      .cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'None', // Agrega esta línea
+        secure: true, // Agrega esta línea
+        maxAge: 86400000, // Ajusta este valor según la duración que desees para la cookie
+      })
       .json({
         success: true,
         message: 'Logged in successfully',
@@ -120,6 +125,7 @@ exports.login = async (req, res) => {
     });
   }
 };
+
 
 exports.protectedRoute = async (req, res) => {
   try {
