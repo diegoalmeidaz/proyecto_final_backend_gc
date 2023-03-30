@@ -139,7 +139,7 @@ exports.protectedRoute = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
-    return res.status(200).clearCookie('token', { httpOnly: true }).json({
+    return res.status(200).clearCookie('token', { httpOnly: true, sameSite: 'none', secure: true }).json({
       success: true,
       message: 'Logged out successfully',
     });
