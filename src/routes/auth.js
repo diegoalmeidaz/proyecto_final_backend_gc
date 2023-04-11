@@ -20,6 +20,21 @@ const { registerValidation, loginValidation } = require('../validators/auth')
 const { userAuth, adminAuth } = require('../middlewares/auth-middleware')
 const router = Router()
 
+
+
+router.get('/get-users', getUsers)
+router.get('/protected', userAuth, protectedRoute)
+router.post('/register', registerValidation, validationMiddleware, register)
+router.post('/login', loginValidation, validationMiddleware, login)
+router.post('/register_admin', registerValidation, validationMiddleware, register_admin)
+router.put('/updateinfo/:user_id', updateUser);
+router.delete('/auth/delete/:user_id', userAuth, adminAuth, deleteUser);
+router.get('/me', userAuth, getUserInfo);
+router.put('/:user_id/password', updatePassword);
+router.get('/logout', logout)
+router.get('/user/:user_id', getUserInfoById);
+
+
 /**
  * @swagger
  * tags:
@@ -63,7 +78,7 @@ const router = Router()
  *                         example: guapacarlota@example.com
  */
 
-router.get('/get-users', getUsers)
+
 
 /**
  * @swagger
@@ -97,7 +112,7 @@ router.get('/get-users', getUsers)
  *                   type: string
  *                   example: No autorizado
  */
-router.get('/protected', userAuth, protectedRoute)
+
 
 /**
  * @swagger
@@ -164,7 +179,7 @@ router.get('/protected', userAuth, protectedRoute)
  *                   example: Error message
  */
 
-router.post('/register', registerValidation, validationMiddleware, register)
+
 
 /**
  * @swagger
@@ -189,7 +204,7 @@ router.post('/register', registerValidation, validationMiddleware, register)
  *         description: Datos inválidos o faltantes
  */
 
-router.post('/register_admin', registerValidation, validationMiddleware, register_admin)
+
 
 /**
  * @swagger
@@ -222,7 +237,7 @@ router.post('/register_admin', registerValidation, validationMiddleware, registe
  *       401:
  *         description: Credenciales incorrectas
  */
-router.post('/login', loginValidation, validationMiddleware, login)
+
 
 /**
  * @swagger
@@ -236,7 +251,7 @@ router.post('/login', loginValidation, validationMiddleware, login)
  *       200:
  *         description: Sesión cerrada con éxito
  */
-router.get('/logout', logout)
+
 
 /**
  * @swagger
@@ -268,7 +283,7 @@ router.get('/logout', logout)
  *         description: Usuario no encontrado
  */
 
-router.put('/updateinfo/:user_id', updateUser);
+
 
 /**
  * @swagger
@@ -299,7 +314,7 @@ router.put('/updateinfo/:user_id', updateUser);
  */
 
 
-router.delete('/auth/delete/:user_id', userAuth, adminAuth, deleteUser);
+
 
 /**
  * @swagger
@@ -321,7 +336,7 @@ router.delete('/auth/delete/:user_id', userAuth, adminAuth, deleteUser);
  *       401:
  *         description: No autorizado, token inválido o faltante
  */
-router.get('/me', userAuth, getUserInfo);
+
 
 /**
  * @swagger
@@ -354,7 +369,7 @@ router.get('/me', userAuth, getUserInfo);
  *       404:
  *         description: Usuario no encontrado
  */
-router.put('/:user_id/password', updatePassword);
+
 
 /**
  * @swagger
@@ -383,6 +398,6 @@ router.put('/:user_id/password', updatePassword);
  *       404:
  *         description: Usuario no encontrado
  */
-router.get('/user/:user_id', getUserInfoById);
+
 
 module.exports = router

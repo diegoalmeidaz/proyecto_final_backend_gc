@@ -6,7 +6,7 @@ const db = require('../db/pool')
 const cookieExtractor = function (req) {
   let token = null
   if (req && req.cookies) token = req.cookies['token']
-  // console.log("Extracted token:", token); 
+ 
   return token
 }
 

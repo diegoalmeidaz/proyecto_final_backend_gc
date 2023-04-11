@@ -1,7 +1,7 @@
 // index.js
 const express = require("express");
 const app = express();
-const { PORT, CLIENT_URL } = require("./constants/ports");
+const { PORT, CLIENT_URL, CLIENT_URL_LOCAL } = require("./constants/ports");
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
 require("./middlewares/passport-middleware");
@@ -38,7 +38,22 @@ const userRoleRouter = require("./routes/userRole");
 // Configura los middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+
+const allowedOrigins = [CLIENT_URL, CLIENT_URL_LOCAL];
+
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
+  credentials: true
+}));
+
+
 app.use(passport.initialize());
 
 app.use(
